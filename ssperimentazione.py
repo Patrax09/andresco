@@ -38,15 +38,27 @@ async def play(ctx, *, url):  # Definisce il comando 'play', che riproduce una c
         'format': 'bestaudio/best', # Scarica il miglior formato audio disponibile
         'postprocessors': [{ # Configura il post-processamento
             'key': 'FFmpegExtractAudio', # Utilizza FFmpeg per estrarre l'audio
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
+            'preferredcodec': 'mp3', # Codec preferito: MP3
+            'preferredquality': '192', # Qualità preferita: 192kbps
         }],
     }
-  with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=False)
-        url2 = info['formats'][0]['url']
-        ctx.voice_client.stop()
-        ctx.voice_client.play(discord.FFmpegPCMAudio(url2), after=lambda e: print(f"Errore: {e}"))
-        await ctx.send(f"Sto riproducendo: {info['title']}")
+  with youtube_dl.YoutubeDL(ydl_opts) as ydl: # Crea un'istanza di youtube_dl con le opzioni configurate
+        info = ydl.extract_info(url, download=False) # Estrae informazioni dal video senza scaricarlo
+        url2 = info['formats'][0]['url'] # Ottiene l'URL diretto dell'audio
+        ctx.voice_client.stop()  # Ferma qualsiasi audio in riproduzione
+        ctx.voice_client.play(discord.FFmpegPCMAudio(url2), after=lambda e: print(f"Errore: {e}"))  # Riproduce l'audio usando FFmpeg
+        await ctx.send(f"Sto riproducendo: {info['title']}") # Invia un messaggio con il titolo della canzone
+
+# Comando per fermare la riproduzione
+@bot.command() # Definisce un nuovo comando del bot
+async def stop(ctx): # Definisce il comando 'stop', che ferma la riproduzione corrente
+    if ctx.voice_client: # Controlla se il bot è connesso a un canale vocale
+        ctx.voice_client.stop() # Ferma l'audio in riproduzione
+    else:
+        await ctx.send("Non c'\u00e8 musica da fermare!")  # Messaggio se non c'è musica da fermare
+
+# Esegui il bot con il tuo token
+bot.run("IL_TUO_TOKEN_DEL_BOT") # Avvia il bot utilizzando il token fornito
+
 
 
